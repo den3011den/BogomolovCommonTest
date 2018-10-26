@@ -136,4 +136,8 @@ public class ClientRequest {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return toJson();
+    }
 }

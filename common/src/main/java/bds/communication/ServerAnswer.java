@@ -1,4 +1,4 @@
-package main.java.bds.communication;
+package bds.communication;
 
 public class ServerAnswer {
 }

@@ -1,9 +1,14 @@
 package bds.communication;
 
-// Запрос клиента
+/**
+ * Определяет работу с запросом клиента к серверу
+ *
+ * @author Богомолов Д.С.
+ * @version 1.0
+ */
 public class ClientRequest {
 
-    // номер запроса
+    // номер запроса пользователя
     private int requestNumber;
 
     // id пользователя
@@ -16,11 +21,24 @@ public class ClientRequest {
     private int bet;
 
     // Сторона монеты, на которую делается ставка
-    private String coinSide; // FRONTSIDE - лицевая сторона ("решка"), BACKSIDE - обратная сторона ("орёл")
+    // FRONTSIDE - лицевая сторона ("решка"), BACKSIDE - обратная сторона ("орёл")
+    private String coinSide;
 
+    /**
+     * Конструктор без параметров
+     */
     public ClientRequest() {
     }
 
+    /**
+     * Параметризованный конструктор
+     *
+     * @param requestNumber номер по порядку запроса пользователя
+     * @param userId        id пользователя
+     * @param userName      наименование пользователя
+     * @param bet           ставка
+     * @param coinSide      cторона монеты, на которую делается ставка. FRONTSIDE - лицевая сторона ("решка"), BACKSIDE - обратная сторона ("орёл")
+     */
     public ClientRequest(int requestNumber, int userId, String userName, int bet, String coinSide) {
         this.requestNumber = requestNumber;
         this.userId = userId;
@@ -29,46 +47,79 @@ public class ClientRequest {
         this.coinSide = coinSide;
     }
 
+    /**
+     * @return номер по порядку запроса пользователя
+     */
     public int getRequestNumber() {
         return requestNumber;
     }
 
+    /**
+     * @param requestNumber номер по порядку запроса пользователя
+     */
     public void setRequestNumber(int requestNumber) {
         this.requestNumber = requestNumber;
     }
 
+    /**
+     * @return id пользователя
+     */
     public int getUserId() {
         return userId;
     }
 
+    /**
+     * @param userId id пользователя
+     */
     public void setUserId(int userId) {
         this.userId = userId;
     }
 
+    /**
+     * @return наименование пользователя
+     */
     public String getUserName() {
         return userName;
     }
 
+    /**
+     * @param userName наименование пользователя
+     */
     public void setUserName(String userName) {
         this.userName = userName;
     }
 
+    /**
+     * @return ставка
+     */
     public int getBet() {
         return bet;
     }
 
+    /**
+     * @param bet ставка
+     */
     public void setBet(int bet) {
         this.bet = bet;
     }
 
+    /**
+     * @return cторона монеты, на которую делается ставка. FRONTSIDE - лицевая сторона ("решка"), BACKSIDE - обратная сторона ("орёл")
+     */
     public String getCoinSide() {
         return coinSide;
     }
 
+    /**
+     * @param coinSide cторона монеты, на которую делается ставка. FRONTSIDE - лицевая сторона ("решка"), BACKSIDE - обратная сторона ("орёл")
+     */
     public void setCoinSide(String coinSide) {
         this.coinSide = coinSide;
     }
 
+    /**
+     * @return поля объекта типа ClientRequest переведённые в json-строку
+     */
     public String toJson() {
         return "{\"requestNumber\":" + Integer.toString(requestNumber) + "," +
                 "\"userId\":" + Integer.toString(userId) + "," +
@@ -77,6 +128,10 @@ public class ClientRequest {
                 "\"coinSide\":\"" + coinSide + "\"}";
     }
 
+    /**
+     * @param jsonString поля объекта типа ClientRequest переведённые в json-строку
+     * @return true - операция получения данных объекта из json-строки прошла удачно, false - операция получения данных объекта из json-строки прошла не удачно
+     */
     public boolean fromJson(String jsonString) {
 
         int fromIndex = 0;
@@ -127,7 +182,7 @@ public class ClientRequest {
         endIndex = jsonString.indexOf("}", fromIndex) - 1;
         if (endIndex == -1) return false;
         try {
-        coinSide = jsonString.substring(beginIndex, endIndex).toUpperCase();
+            coinSide = jsonString.substring(beginIndex, endIndex).toUpperCase();
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
             return false;
@@ -136,6 +191,9 @@ public class ClientRequest {
         return true;
     }
 
+    /**
+     * @return представление полей объекта в json-строке
+     */
     @Override
     public String toString() {
         return toJson();

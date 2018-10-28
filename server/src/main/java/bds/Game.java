@@ -2,19 +2,31 @@ package bds;
 
 import bds.communication.ClientRequest;
 
+/**
+ * Игра - условия и сам игровой акт
+ */
 public class Game {
-    private static final float PROBABILITY = 0.5F; // вероятность выигрыша 50%
+    // вероятность выигрыша 50%
+    private static final float PROBABILITY = 0.5F;
+    // коэффициент выигрыша
     private static final float BET_COEFFICIENT = 1.9F;
+    // запрос клиента с данными ставки
     private ClientRequest clientRequest;
 
+    /**
+     * @param clientRequest запрос клинета с данными о ставке
+     */
     public Game(ClientRequest clientRequest) {
         this.clientRequest = clientRequest;
     }
 
+    /**
+     * @return выигрыш (отрицательное число - проигрыш)
+     */
     public float gameRound() {
-        boolean winFlag = (Math.random() <= Game.PROBABILITY) ? true : false;
+        String winFlag = (Math.random() <= Game.PROBABILITY) ? "FRONTSIDE" : "BACKSIDE";
         float win;
-        if (winFlag) {
+        if (winFlag.equals(clientRequest.getCoinSide())) {
             win = clientRequest.getBet() * Game.BET_COEFFICIENT;
         }
         else {
@@ -24,10 +36,17 @@ public class Game {
         return win;
     }
 
+    /**
+     * @return запрос клинета с данными о ставке
+     */
     public ClientRequest getClientRequest() {
         return clientRequest;
     }
 
+
+    /**
+     * @param clientRequest  запрос клинета с данными о ставке
+     */
     public void setClientRequest(ClientRequest clientRequest) {
         this.clientRequest = clientRequest;
     }

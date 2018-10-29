@@ -16,56 +16,33 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class GameServer extends Thread {
 
-    // сокет
-    Socket socket;
     // номер нити
     int threadNumber = 0;
-    // текущий номер записи в истории событий аккаунтов
-    AtomicInteger historyId = new AtomicInteger(0);
 
-    // таблица аккаунтов игроков. Если игрок обращается к серверу впервые - создаём аккаунт и даёт 100 игровых денежных единиц
-    ConcurrentHashMap<String, Account> accounts = new ConcurrentHashMap<>();
+    // ссылка на таблицу аккаунтов игроков
+    ConcurrentHashMap<String, Account> accounts;
 
-    // таблица событий аккаунтов. Записываем только события создания аккаунта при первом обращении игрока к серверу
-    // и события, когда сервер допустил запрос игрока до игрового раунда (gameRound())
-    // события, когда пришла отрицательная ставка или ставка больше остатка на счёте не приводят к игровому раунду и
-    // в историю не пишутся
-    ConcurrentHashMap<String, AccountHistoryQuantum> accountsHistory = new ConcurrentHashMap<>();
+    // ссылка на таблицу событий аккаунтов
+    ConcurrentHashMap<String, AccountHistoryQuantum> accountsHistory;
 
-    // запуск игрового сервера
-    public static void main(String args[])
-    {
-        try
-        {
-            int i = 1; // счётчик подключений
+    // ссылка на текущий номер записи в истории событий аккаунтов
+    AtomicInteger historyId;
 
-            // локалхост, порт 3001
-            ServerSocket server = new ServerSocket(3001, 0, InetAddress.getByName("localhost"));
-
-            System.out.println("server has been started");
-
-            // слушаем порт
-            while(true)
-            {
-                // ждём нового подключения (реквеста), после чего запускаем обработку
-                // запроса клиента в отдельном потоке и увеличиваем счётчик на единицу
-                new GameServer(server.accept(), i);
-                i++;
-            }
-        }
-        catch(Exception e)
-            { e.printStackTrace(); } // вывод исключений
-    }
-
+    // сокет
+    Socket socket;
 
     /**
      * @param socket сокет
      * @param threadNumber номер потока
      */
-    public GameServer(Socket socket, int threadNumber)
+    public GameServer(Socket socket, int threadNumber, AtomicInteger historyId, ConcurrentHashMap<String, Account> accounts,
+                      ConcurrentHashMap<String, AccountHistoryQuantum> accountsHistory)
     {
         this.threadNumber = threadNumber;
         this.socket = socket;
+        this.accounts = accounts;
+        this.accountsHistory = accountsHistory;
+        this.historyId = historyId;
 
         // запуск потока
         setDaemon(true);

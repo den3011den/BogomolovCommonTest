@@ -3,11 +3,11 @@ package bds;
 public class Gamer {
     private int userId;
     private String userName;
-    private float score;
-    private int goodRequestCount;
-    private int badRequestCount;
-    private long allRequestTime;
-    private long averageRequestTime;
+    private float score = 0.0F;
+    private int goodRequestCount = 0;
+    private int badRequestCount = 0;
+    private long allRequestTime = 0L;
+    private long averageRequestTime = 0L;
 
     public int getUserId() {
         return userId;

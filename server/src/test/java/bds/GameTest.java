@@ -1,7 +1,7 @@
 package bds;
 
-import bds.communication.ClientRequest;
 
+import bds.communication.ClientRequest;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

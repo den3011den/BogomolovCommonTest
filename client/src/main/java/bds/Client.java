@@ -4,32 +4,51 @@ import bds.communication.ClientRequest;
 import bds.communication.ServerResponse;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Клиент сервера. Содержит одного игрока в одном потоке со всеми его попытками
+ */
 public class Client extends Thread{
 
+    // cjrtn
     private Socket socket;
     // поток данных от сервера
     private InputStream inputStream;
     // поток данных к серверу
     private OutputStream outputStream;
+    // общее количество потоков - одновременно играющих игроков- клиентов
     private static int threadcount = 0;
+    // адрес
     InetAddress addr;
+    // ссылка на игрока
     Gamer gamer;
+    // ссылка на базу игроков
     ConcurrentHashMap<String, Gamer> gamers;
 
+    // интервал запросов в миллисекундах
     int requestInterval;
+    // количество запросов к серверу одного игрока
     int requestCount;
 
+    /**
+     * @return количество одновременно играющих игроков-потоков
+     */
     public static int threadCount() {
         return threadcount;
     }
 
+
+    /**
+     * @param addr адрес подключения
+     * @param gamer ссылка на игрока
+     * @param gamers ссылка на базу (список) игроков
+     * @param requestInterval интервал между запросами в миллисекундах
+     * @param requestCount количество запросов к серверу одного игрока
+     */
     public Client(InetAddress addr, Gamer gamer, ConcurrentHashMap<String, Gamer> gamers, int requestInterval, int requestCount) {
 
         this.addr = addr;
@@ -45,6 +64,7 @@ public class Client extends Thread{
         }
         catch (IOException e) {
             long endTime = System.currentTimeMillis();
+            // засчитываем попытку неудачной и добавляем её время
             gamer.changeBadRequestCount(1);
             gamer.changeAllRequestTime(endTime - startTime);
             e.printStackTrace();
@@ -64,6 +84,7 @@ public class Client extends Thread{
         }
         catch (IOException e) {
             long endTime = System.currentTimeMillis();
+            // засчитываем попытку неудачной
             gamer.changeBadRequestCount(1);
             gamer.changeAllRequestTime(endTime - startTime);
 
@@ -77,11 +98,16 @@ public class Client extends Thread{
 
     }
 
+    /**
+     * Алгоритм работы нити игрока
+     */
     public void run() {
         try {
 
+            // кол-во одновременно играющих
             threadcount++;
 
+            //
             for (int i = 0, requestNumber = 0; i < requestCount; i++, requestNumber++) {
 
                 requestNumber++;
@@ -100,7 +126,8 @@ public class Client extends Thread{
 
                 outputStream.write(bufSend);
 
-                socket.setSoTimeout(5000);
+                // ждём ответ от сервера на свой запрос 10 секунд
+                socket.setSoTimeout(10000);
 
                 int realBytesCount = 0;
 
@@ -108,6 +135,7 @@ public class Client extends Thread{
                     realBytesCount = inputStream.read(bufResive);
                 }
                 catch (SocketTimeoutException e) {
+                    // не получили ответ от сервера за 10 секунд - считаем неудачной попытку
                     long endTime = System.currentTimeMillis();
                     gamer.changeBadRequestCount(1);
                     gamer.changeAllRequestTime(endTime - startTime);
@@ -123,19 +151,23 @@ public class Client extends Thread{
                     ServerResponse serverResponse = new ServerResponse();
                     serverResponse.fromJson(gotString);
                     if (serverResponse.getStatus() == 1) {
+                        // раунд игры состоялся, считаем попытку удачной
                         gamer.changeGoodRequestCount(1);
                         gamer.changeScore(serverResponse.getWin());
                         gamer.changeAllRequestTime(diffTime);
                     }
                     if (serverResponse.getStatus() == -1) {
+                        // раунд игры Не состоялся, но ответ от сервера получен
+                        // по условию задания считаем попытку удачной
                         gamer.changeGoodRequestCount(1);
                         gamer.changeAllRequestTime(diffTime);
                     }
 
                 }
 
+                // в интрервале между запросами грубо пытаемся учесть время самого запроса
                 if (diffTime < requestInterval)
-                    sleep(requestInterval);
+                    sleep(requestInterval - diffTime);
 
             }
         }
@@ -150,7 +182,8 @@ public class Client extends Thread{
             catch (IOException e) {
                 e.printStackTrace();
             }
-            threadcount--; // Завершаем нить
+            // уменьшаем кол-во играющих
+            threadcount--;
         }
     }
 

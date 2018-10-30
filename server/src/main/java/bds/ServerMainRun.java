@@ -43,11 +43,12 @@ public class ServerMainRun {
             // локалхост, порт 3001
             ServerSocket server = new ServerSocket(PORT, 0, inetAddress);
 
-            System.out.println("server has been started");
+            System.out.println(Thread.currentThread().getName() + " : server has been started");
 
             // слушаем порт
             while(true)
             {
+                System.out.println(Thread.currentThread().getName() + " : waiting for client connection ...");
                 // ждём нового подключения (реквеста), после чего запускаем обработку
                 // запроса клиента в отдельном потоке и увеличиваем счётчик на единицу
                 new GameServer(server.accept(), i, historyId, accounts, accountsHistory);

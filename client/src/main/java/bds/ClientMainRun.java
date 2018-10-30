@@ -17,14 +17,19 @@ public class ClientMainRun {
     // таблица игроков
     static ConcurrentHashMap<String, Gamer> gamers = new ConcurrentHashMap<>();
 
+    // активные потоки
+    static ConcurrentHashMap<String, Thread> threads = new ConcurrentHashMap<>();
+
     // считаем, что ставят всегда по 10 игровых денежных единиц
     static final int BET = 10;
 
-    // общее время теста ~
+    // общее время теста ~ 2 мин
     static final long TEST_TIME = 120_000;
 
     // main
     public static void main(String[] args) throws InterruptedException {
+
+        System.out.println(Thread.currentThread().getName() + " : starting client test ");
 
         // адрес подключения
         InetAddress inetAddress = null;
@@ -86,14 +91,25 @@ public class ClientMainRun {
                 // ложим игрока в базу геймеров
                 gamers.put(String.valueOf(gamer.getUserId()) ,gamer);
 
+                System.out.println(Thread.currentThread().getName() + " : created gamer. userId =  " + gamer.getUserId());
+
                 // делаем клиента для сервера для этого игрока
-                new Client(inetAddress, gamer, gamers, requestInterval, requestCount);
+                threads.put(String.valueOf(gamer.getUserId()), new Client(inetAddress, gamer, gamers, requestInterval, requestCount));
 
             } else {
                 // если превышено количество играющих - ждём 100 ms
                 Thread.currentThread().sleep(100);
             }
         }
+
+        System.out.println(Thread.currentThread().getName() + " : waiting for finishing all gamers threads");
+
+        // ждём завершения всех потоков
+        for (String key : threads.keySet()) {
+            threads.get(key).join();
+        }
+
+        System.out.println(Thread.currentThread().getName() + " : all gamers threads has been finished");
 
         System.out.println(String.format("%95s","-"));
         System.out.println(String.format("|%20s|%20s|%20s|%30s|","Пользователь", "Успешные запросы", "Неуспешные запросы", "Среднее время запроса"));
@@ -108,6 +124,8 @@ public class ClientMainRun {
                     gamer.getUserName(), gamer.getGoodRequestCount(), gamer.getBadRequestCount(), gamer.getAverageRequestTime()));
             System.out.println(String.format("%95s","-"));
         }
+
+        System.out.println(Thread.currentThread().getName() + " : client test finished");
 
     }
 

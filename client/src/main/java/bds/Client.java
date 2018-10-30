@@ -117,6 +117,8 @@ public class Client extends Thread{
 
                 String stringToSend = clientRequest.toJson();
 
+                System.out.println(Thread.currentThread().getName() + " : sending client request: " + stringToSend);
+
                 // буффер данных в 64 килобайта
                 byte bufResive[] = new byte[64*1024];
 
@@ -127,7 +129,7 @@ public class Client extends Thread{
                 outputStream.write(bufSend);
 
                 // ждём ответ от сервера на свой запрос 10 секунд
-                socket.setSoTimeout(10000);
+                socket.setSoTimeout(10_000);
 
                 int realBytesCount = 0;
 
@@ -139,6 +141,7 @@ public class Client extends Thread{
                     long endTime = System.currentTimeMillis();
                     gamer.changeBadRequestCount(1);
                     gamer.changeAllRequestTime(endTime - startTime);
+                    System.out.println(Thread.currentThread().getName() + " : server response timeout : 10s");
                 }
 
                 long endTime = System.currentTimeMillis();
@@ -150,6 +153,7 @@ public class Client extends Thread{
                     String gotString = new String(bufResive, 0, realBytesCount);
                     ServerResponse serverResponse = new ServerResponse();
                     serverResponse.fromJson(gotString);
+                    System.out.println(Thread.currentThread().getName() + " : " + gotString);
                     if (serverResponse.getStatus() == 1) {
                         // раунд игры состоялся, считаем попытку удачной
                         gamer.changeGoodRequestCount(1);
@@ -183,7 +187,9 @@ public class Client extends Thread{
                 e.printStackTrace();
             }
             // уменьшаем кол-во играющих
+            System.out.println(Thread.currentThread().getName() + " : thread finished");
             threadcount--;
+            /// ??? ClientMainRun.threads.remove(gamer.getUserId());
         }
     }
 

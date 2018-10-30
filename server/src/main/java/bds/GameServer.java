@@ -55,6 +55,8 @@ public class GameServer extends Thread {
     {
         try
         {
+
+            System.out.println(Thread.currentThread().getName() + " : Got client connection. Started thread. ");
             // поток данных от клиента
             InputStream inputStream = socket.getInputStream();
 
@@ -69,6 +71,8 @@ public class GameServer extends Thread {
             // создаём строку, содержащую полученную от клиента информацию
             String gotString = new String(buf, 0, realBytesCount);
 
+            System.out.println(Thread.currentThread().getName() + " : Got client request : " + gotString);
+
             ClientRequest clientRequest = new ClientRequest();
             clientRequest.fromJson(gotString);
 
@@ -82,12 +86,15 @@ public class GameServer extends Thread {
 
                 // не найден счёт. Создаём и кладём на него 100 игровых денежных единиц
                 if (account == null) {
+
                     Account newAccount = new Account(clientRequest.getUserId(), clientRequest.getUserName(),100); // создание счёта
                     accounts.put(String.valueOf(newAccount.getUserId()), newAccount); // запись в базу счетов
                     historyId.addAndGet(1); // инкремент счётчика базы истории
                     AccountHistoryQuantum accountHistoryQuantum = new AccountHistoryQuantum(historyId.get(),0.0F, System.currentTimeMillis(), clientRequest.getCoinSide(), account); // создаём событие истории
                     accountsHistory.put(String.valueOf(accountHistoryQuantum.getHistoryId()), accountHistoryQuantum); // кладём событие истории в базу истории
                     account = newAccount; // запоминаем ссылку на данные аккаунта
+
+                    System.out.println(Thread.currentThread().getName() + " : Created gamer account. userId : " + account.getUserId());
                 }
 
                 // берём ставку из клиентского запроса
@@ -101,7 +108,8 @@ public class GameServer extends Thread {
                         serverResponse.setStatus(-1);
                         serverResponse.setMessage("Your bet is " + bet + ". It is negative bet or zero bet.");
                         serverResponse.setWin(0.0F);
-
+                        System.out.println(Thread.currentThread().getName() + " : UserId = " + clientRequest.getUserId() +
+                                ". Wrong bet = " + clientRequest.getBet());
                     }
                     else { // ставка корректна и денег хватает
                         Game game = new Game(clientRequest);
@@ -122,7 +130,7 @@ public class GameServer extends Thread {
 
                         account.changeScore(win);
 
-                        accounts.put(String.valueOf(account.getUserId()), account);
+                        //??? accounts.put(String.valueOf(account.getUserId()), account);
                         historyId.addAndGet(1);
                         AccountHistoryQuantum accountHistoryQuantum = new AccountHistoryQuantum(historyId.get(), win, System.currentTimeMillis(), clientRequest.getCoinSide(), account);
                         accountsHistory.put(String.valueOf(accountHistoryQuantum.getHistoryId()), accountHistoryQuantum);
@@ -131,6 +139,9 @@ public class GameServer extends Thread {
 
                 }
                 else {
+                   System.out.println(Thread.currentThread().getName() + " : UserId = " + clientRequest.getUserId() +
+                        ". Not enought money for bet = " + clientRequest.getBet() + " (score = " + account.getScore() + ")");
+
                     // ответ о нехватке средств для ставки
                     serverResponse.setClientRequest(clientRequest);
                     serverResponse.setStatus(-1);
@@ -151,6 +162,9 @@ public class GameServer extends Thread {
 
             String responseString = serverResponse.toJson();
 
+            System.out.println(Thread.currentThread().getName() + " : UserId = " + clientRequest.getUserId() +
+                    ". Sending response string : " + responseString);
+
             // шлём ответ клиенту
             outputStream.write(responseString.getBytes());
 
@@ -159,5 +173,7 @@ public class GameServer extends Thread {
         }
         catch(Exception e)
             {e.printStackTrace();} // вывод исключений
+
+        System.out.println(Thread.currentThread().getName() + " : closing thread");
     }
 }

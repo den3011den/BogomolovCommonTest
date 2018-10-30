@@ -175,7 +175,22 @@ public class ClientRequest {
             e.printStackTrace();
             return false;
         }
+
         fromIndex = endIndex + 3;
+
+        beginIndex = jsonString.indexOf("bet", fromIndex) + 5;
+        if (beginIndex == -1) return false;
+        endIndex = jsonString.indexOf(",", fromIndex);
+        if (endIndex == -1) return false;
+
+        try {
+            bet = Integer.parseInt(jsonString.substring(beginIndex, endIndex));
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        fromIndex = endIndex + 2;
 
         beginIndex = jsonString.indexOf("coinSide", fromIndex) + 11;
         if (beginIndex == -1) return false;

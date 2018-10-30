@@ -31,16 +31,16 @@ public class ServerMainRun {
         }
     }
 
-    static final int PORT = 3001;
+    static final int PORT = 3158;
 
-    // запуск игрового сервер
+    // запуск игрового сервера
     public static void main(String args[])
     {
         try
         {
             int i = 1; // счётчик подключений
 
-            // локалхост, порт 3001
+            // локалхост
             ServerSocket server = new ServerSocket(PORT, 0, inetAddress);
 
             System.out.println(Thread.currentThread().getName() + " : server has been started");

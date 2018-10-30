@@ -90,7 +90,7 @@ public class GameServer extends Thread {
                     Account newAccount = new Account(clientRequest.getUserId(), clientRequest.getUserName(),100); // создание счёта
                     accounts.put(String.valueOf(newAccount.getUserId()), newAccount); // запись в базу счетов
                     historyId.addAndGet(1); // инкремент счётчика базы истории
-                    AccountHistoryQuantum accountHistoryQuantum = new AccountHistoryQuantum(historyId.get(),0.0F, System.currentTimeMillis(), clientRequest.getCoinSide(), account); // создаём событие истории
+                    AccountHistoryQuantum accountHistoryQuantum = new AccountHistoryQuantum(historyId.get(),0.0F, System.currentTimeMillis(), clientRequest.getCoinSide(), newAccount); // создаём событие истории
                     accountsHistory.put(String.valueOf(accountHistoryQuantum.getHistoryId()), accountHistoryQuantum); // кладём событие истории в базу истории
                     account = newAccount; // запоминаем ссылку на данные аккаунта
 
@@ -169,6 +169,8 @@ public class GameServer extends Thread {
             outputStream.write(responseString.getBytes());
 
             // завершаем соединение
+            outputStream.close();
+            inputStream.close();
             socket.close();
         }
         catch(Exception e)

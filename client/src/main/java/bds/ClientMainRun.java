@@ -23,8 +23,8 @@ public class ClientMainRun {
     // считаем, что ставят всегда по 10 игровых денежных единиц
     static final int BET = 10;
 
-    // общее время теста ~ 2 мин
-    static final long TEST_TIME = 120_000;
+    // общее время теста ~
+    static final long TEST_TIME = 5_000;
 
     // main
     public static void main(String[] args) throws InterruptedException {
@@ -96,7 +96,9 @@ public class ClientMainRun {
                 // делаем клиента для сервера для этого игрока
                 threads.put(String.valueOf(gamer.getUserId()), new Client(inetAddress, gamer, gamers, requestInterval, requestCount));
 
+
             } else {
+                System.out.println(Thread.currentThread().getName() + " : pause 100 ms ");
                 // если превышено количество играющих - ждём 100 ms
                 Thread.currentThread().sleep(100);
             }
@@ -111,9 +113,11 @@ public class ClientMainRun {
 
         System.out.println(Thread.currentThread().getName() + " : all gamers threads has been finished");
 
-        System.out.println(String.format("%95s","-"));
+        String lineString = String.format("%95s"," ").replace(' ','-');
+
+        System.out.println(lineString);
         System.out.println(String.format("|%20s|%20s|%20s|%30s|","Пользователь", "Успешные запросы", "Неуспешные запросы", "Среднее время запроса"));
-        System.out.println(String.format("%95s","-"));
+        System.out.println(lineString);
 
         // таблица результатов
         long i = 0;
@@ -122,7 +126,7 @@ public class ClientMainRun {
             gamer = gamers.get(key);
             System.out.println(String.format("|%20s|%20s|%20s|%30s|",
                     gamer.getUserName(), gamer.getGoodRequestCount(), gamer.getBadRequestCount(), gamer.getAverageRequestTime()));
-            System.out.println(String.format("%95s","-"));
+            System.out.println(lineString);
         }
 
         System.out.println(Thread.currentThread().getName() + " : client test finished");

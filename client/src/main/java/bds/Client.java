@@ -6,20 +6,24 @@ import bds.communication.ServerResponse;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Клиент сервера. Содержит одного игрока в одном потоке со всеми его попытками
  */
-public class Client extends Thread{
+public class Client extends Thread {
 
-    // cjrtn
-    private Socket socket;
+
+    // сокет
+    Socket socket;
     // поток данных от сервера
-    private InputStream inputStream;
+    InputStream inputStream;
     // поток данных к серверу
-    private OutputStream outputStream;
+    OutputStream outputStream;
+
     // общее количество потоков - одновременно играющих игроков- клиентов
     private static int threadcount = 0;
     // адрес
@@ -43,11 +47,11 @@ public class Client extends Thread{
 
 
     /**
-     * @param addr адрес подключения
-     * @param gamer ссылка на игрока
-     * @param gamers ссылка на базу (список) игроков
+     * @param addr            адрес подключения
+     * @param gamer           ссылка на игрока
+     * @param gamers          ссылка на базу (список) игроков
      * @param requestInterval интервал между запросами в миллисекундах
-     * @param requestCount количество запросов к серверу одного игрока
+     * @param requestCount    количество запросов к серверу одного игрока
      */
     public Client(InetAddress addr, Gamer gamer, ConcurrentHashMap<String, Gamer> gamers, int requestInterval, int requestCount) {
 
@@ -57,12 +61,27 @@ public class Client extends Thread{
         this.requestCount = requestCount;
         this.requestInterval = requestInterval;
 
+        if (socketStart()) {
+            setDaemon(true);
+            setPriority(NORM_PRIORITY);
+            start();
+        }
+
+
+    }
+
+
+    //
+    private boolean socketStart() {
+
+        boolean okFlag = true;
+
         long startTime = System.currentTimeMillis();
 
         try {
             socket = new Socket(addr, ServerMainRun.PORT);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
+            okFlag = false;
             long endTime = System.currentTimeMillis();
             // засчитываем попытку неудачной и добавляем её время
             gamer.changeBadRequestCount(1);
@@ -80,9 +99,10 @@ public class Client extends Thread{
             // поток данных к серверу
             outputStream = socket.getOutputStream();
 
-            start();
-        }
-        catch (IOException e) {
+            // запуск потока
+
+        } catch (IOException e) {
+            okFlag = false;
             long endTime = System.currentTimeMillis();
             // засчитываем попытку неудачной
             gamer.changeBadRequestCount(1);
@@ -90,107 +110,141 @@ public class Client extends Thread{
 
             try {
                 socket.close();
-            }
-            catch (IOException e2) {
+            } catch (IOException e2) {
                 e.printStackTrace();
             }
         }
 
+        return okFlag;
     }
+
 
     /**
      * Алгоритм работы нити игрока
      */
     public void run() {
-        try {
+   //     try {
 
-            // кол-во одновременно играющих
-            threadcount++;
 
-            //
-            for (int i = 0, requestNumber = 0; i < requestCount; i++, requestNumber++) {
 
-                requestNumber++;
+                // кол-во одновременно играющих
+                threadcount++;
+                socket.toString();
 
-                ClientRequest clientRequest = new ClientRequest(requestNumber, gamer.getUserId(), gamer.getUserName(),
-                    ClientMainRun.BET, "FRONTSIDE");
+                //
+                for (int i = 0, requestNumber = 0; i < requestCount; i++, requestNumber++) {
 
-                String stringToSend = clientRequest.toJson();
+                    int badFlag = 0;
 
-                System.out.println(Thread.currentThread().getName() + " : sending client request: " + stringToSend);
+                    requestNumber++;
 
-                // буффер данных в 64 килобайта
-                byte bufResive[] = new byte[64*1024];
+                    ClientRequest clientRequest = new ClientRequest(requestNumber, gamer.getUserId(), gamer.getUserName(),
+                            ClientMainRun.BET, "FRONTSIDE");
 
-                byte bufSend[] = stringToSend.getBytes();
+                    String stringToSend = clientRequest.toJson();
 
-                long startTime = System.currentTimeMillis();
+                    System.out.println(Thread.currentThread().getName() + " : sending client request: " + stringToSend);
 
-                outputStream.write(bufSend);
+                    // буффер данных в 64 килобайта
+                    byte bufResive[] = new byte[64 * 1024];
 
-                // ждём ответ от сервера на свой запрос 10 секунд
-                socket.setSoTimeout(10_000);
+                    byte bufSend[] = stringToSend.getBytes();
 
-                int realBytesCount = 0;
+                    long startTime = System.currentTimeMillis();
 
-                try {
-                    realBytesCount = inputStream.read(bufResive);
-                }
-                catch (SocketTimeoutException e) {
-                    // не получили ответ от сервера за 10 секунд - считаем неудачной попытку
+                    try {
+                        outputStream.write(bufSend);
+                    } catch (IOException e) {
+                        // не смогли послать запрос
+                        badFlag = 1;
+                        long endTime = System.currentTimeMillis();
+                        gamer.changeBadRequestCount(1);
+                        gamer.changeAllRequestTime(endTime - startTime);
+                        System.out.println(Thread.currentThread().getName() + " : cannot send request to server. Bad requests + 1");
+
+                    }
+
+                    // ждём ответ от сервера на свой запрос 10 секунд
+                    try {
+                        socket.setSoTimeout(10_000);
+                    } catch (SocketException e) {
+                        e.printStackTrace();
+                    }
+
+                    int realBytesCount = 0;
+
+                    if (badFlag == 0) {
+                        try {
+                            realBytesCount = inputStream.read(bufResive);
+                        } catch (SocketTimeoutException e) {
+                            // не получили ответ от сервера за 10 секунд - считаем неудачной попытку
+                            long endTime = System.currentTimeMillis();
+                            gamer.changeBadRequestCount(1);
+                            gamer.changeAllRequestTime(endTime - startTime);
+                            System.out.println(Thread.currentThread().getName() + " : server response timeout : 10s");
+                        } catch (IOException e) {
+                            // не смогли прочитать ответ
+                            long endTime = System.currentTimeMillis();
+                            gamer.changeBadRequestCount(1);
+                            gamer.changeAllRequestTime(endTime - startTime);
+                            System.out.println(Thread.currentThread().getName() + " : cannot read server response. Bad requests + 1");
+
+                        }
+                    }
+
                     long endTime = System.currentTimeMillis();
-                    gamer.changeBadRequestCount(1);
-                    gamer.changeAllRequestTime(endTime - startTime);
-                    System.out.println(Thread.currentThread().getName() + " : server response timeout : 10s");
-                }
 
-                long endTime = System.currentTimeMillis();
+                    long diffTime = endTime - startTime;
 
-                long diffTime = endTime - startTime;
+                    if (realBytesCount > 0) {
+                        // создаём строку, содержащую полученную от сервера информацию
+                        String gotString = new String(bufResive, 0, realBytesCount);
+                        ServerResponse serverResponse = new ServerResponse();
+                        serverResponse.fromJson(gotString);
+                        System.out.println(Thread.currentThread().getName() + " : " + gotString);
+                        if (serverResponse.getStatus() == 1) {
+                            // раунд игры состоялся, считаем попытку удачной
+                            gamer.changeGoodRequestCount(1);
+                            gamer.changeScore(serverResponse.getWin());
+                            gamer.changeAllRequestTime(diffTime);
+                        }
+                        if (serverResponse.getStatus() == -1) {
+                            // раунд игры Не состоялся, но ответ от сервера получен
+                            // по условию задания считаем попытку удачной
+                            gamer.changeGoodRequestCount(1);
+                            gamer.changeAllRequestTime(diffTime);
+                        }
 
-                if (realBytesCount > 0) {
-                    // создаём строку, содержащую полученную от клиента информацию
-                    String gotString = new String(bufResive, 0, realBytesCount);
-                    ServerResponse serverResponse = new ServerResponse();
-                    serverResponse.fromJson(gotString);
-                    System.out.println(Thread.currentThread().getName() + " : " + gotString);
-                    if (serverResponse.getStatus() == 1) {
-                        // раунд игры состоялся, считаем попытку удачной
-                        gamer.changeGoodRequestCount(1);
-                        gamer.changeScore(serverResponse.getWin());
-                        gamer.changeAllRequestTime(diffTime);
-                    }
-                    if (serverResponse.getStatus() == -1) {
-                        // раунд игры Не состоялся, но ответ от сервера получен
-                        // по условию задания считаем попытку удачной
-                        gamer.changeGoodRequestCount(1);
-                        gamer.changeAllRequestTime(diffTime);
                     }
 
+                    // в интрервале между запросами грубо пытаемся учесть время самого запроса
+                    if (diffTime < requestInterval) {
+                        try {
+                            sleep(requestInterval - diffTime);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                 }
 
-                // в интрервале между запросами грубо пытаемся учесть время самого запроса
-                if (diffTime < requestInterval)
-                    sleep(requestInterval - diffTime);
-
-            }
-        }
-        catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        finally {
+ //       } catch (IOException | InterruptedException e) {
+ //           e.printStackTrace();
+ //       } finally {
             // Всегда закрывает:
-            try {
-                socket.close();
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                outputStream.close();
+//                inputStream.close();
+//                socket.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
             // уменьшаем кол-во играющих
             System.out.println(Thread.currentThread().getName() + " : thread finished");
             threadcount--;
             /// ??? ClientMainRun.threads.remove(gamer.getUserId());
-        }
-    }
+//        }
 
+    }
 }
+

@@ -97,8 +97,8 @@ public class ServerResponse {
 
         String clientRequestJsonString = jsonString.substring(beginIndex, endIndex);
 
-        if (!clientRequest.fromJson(clientRequestJsonString))
-            return false;
+       // if (!clientRequest.fromJson(clientRequestJsonString))
+       //     return false;
 
         fromIndex = endIndex + 1;
 

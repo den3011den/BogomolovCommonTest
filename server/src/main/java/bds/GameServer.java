@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class GameServer extends Thread {
 
+    //AtomicInteger testScore;
+
     // номер нити
     int threadNumber = 0;
 
@@ -42,6 +44,8 @@ public class GameServer extends Thread {
         this.accounts = accounts;
         this.accountsHistory = accountsHistory;
         this.historyId = historyId;
+
+        //this.testScore = ServerMainRun.testScore;
 
         // запуск потока
         setDaemon(true);
@@ -107,6 +111,9 @@ public class GameServer extends Thread {
                         accountsHistory.put(String.valueOf(accountHistoryQuantum.getHistoryId()), accountHistoryQuantum); // кладём событие истории в базу истории
                         account = newAccount; // запоминаем ссылку на данные аккаунта
 
+//                        if (newAccount.getUserId()==44)
+//                            ServerMainRun.testScore.addAndGet((100));
+
                         System.out.println(Thread.currentThread().getName() + " : Created gamer account. userId : " + account.getUserId());
                     }
 
@@ -141,6 +148,9 @@ public class GameServer extends Thread {
                             serverResponse.setWin(win);
 
                             account.changeScore(win);
+
+//                            if (account.getUserId()==44)
+//                                ServerMainRun.testScore.addAndGet((int)win);
 
                             //??? accounts.put(String.valueOf(account.getUserId()), account);
                             historyId.addAndGet(1);

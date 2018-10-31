@@ -48,13 +48,15 @@ public class ClientRequest {
     }
 
     /**
-     * @return номер по порядку запроса пользователя
+     * Получить номер запроса пользователя
+     * @return номер запроса пользователя
      */
     public int getRequestNumber() {
         return requestNumber;
     }
 
     /**
+     * Установить номер запроса пользователя
      * @param requestNumber номер по порядку запроса пользователя
      */
     public void setRequestNumber(int requestNumber) {
@@ -62,6 +64,7 @@ public class ClientRequest {
     }
 
     /**
+     * Получить идентификационный номер пользователя
      * @return id пользователя
      */
     public int getUserId() {
@@ -69,6 +72,7 @@ public class ClientRequest {
     }
 
     /**
+     * Установить идентификационный номер пользователя
      * @param userId id пользователя
      */
     public void setUserId(int userId) {
@@ -76,6 +80,7 @@ public class ClientRequest {
     }
 
     /**
+     * Получить наименование пользователя
      * @return наименование пользователя
      */
     public String getUserName() {
@@ -83,6 +88,7 @@ public class ClientRequest {
     }
 
     /**
+     * Установить наименование пользователя
      * @param userName наименование пользователя
      */
     public void setUserName(String userName) {
@@ -90,6 +96,7 @@ public class ClientRequest {
     }
 
     /**
+     * Получить ставку
      * @return ставка
      */
     public int getBet() {
@@ -97,6 +104,7 @@ public class ClientRequest {
     }
 
     /**
+     * Установить ставку
      * @param bet ставка
      */
     public void setBet(int bet) {
@@ -104,6 +112,7 @@ public class ClientRequest {
     }
 
     /**
+     * Получить сторону монеты, на выпадение которой производится ставка
      * @return cторона монеты, на которую делается ставка. FRONTSIDE - лицевая сторона ("решка"), BACKSIDE - обратная сторона ("орёл")
      */
     public String getCoinSide() {
@@ -111,6 +120,7 @@ public class ClientRequest {
     }
 
     /**
+     * Установить сторону монеты, на выпадение которой производится ставка
      * @param coinSide cторона монеты, на которую делается ставка. FRONTSIDE - лицевая сторона ("решка"), BACKSIDE - обратная сторона ("орёл")
      */
     public void setCoinSide(String coinSide) {
@@ -118,6 +128,7 @@ public class ClientRequest {
     }
 
     /**
+     * Получить данные объекта в json-представлении
      * @return поля объекта типа ClientRequest переведённые в json-строку
      */
     public String toJson() {
@@ -129,6 +140,7 @@ public class ClientRequest {
     }
 
     /**
+     * Распарсить строку json в данные объекта ClientRequest
      * @param jsonString поля объекта типа ClientRequest переведённые в json-строку
      * @return true - операция получения данных объекта из json-строки прошла удачно, false - операция получения данных объекта из json-строки прошла не удачно
      */
@@ -207,6 +219,7 @@ public class ClientRequest {
     }
 
     /**
+     * Получить строковое представление объекта (в представлении json)
      * @return представление полей объекта в json-строке
      */
     @Override

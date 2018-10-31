@@ -9,12 +9,13 @@ public class ServerResponse {
     private ClientRequest clientRequest;
     // статус ответа = 1 - удачно, = -1 - не удачно
     private int status;
-    // сообщение
+    // сообщение-ответ сервера
     private String message;
     // выигрыш. При проигрыше - отрицательный
     private float win;
 
     /**
+     * Получить исходнай запрос клиента (запрос, на который отвечает сарвер)
      * @return исходный запрос клиента
      */
     public ClientRequest getClientRequest() {
@@ -22,6 +23,7 @@ public class ServerResponse {
     }
 
     /**
+     * Установить исходный запрос клиента (ссылку на него)
      * @param clientRequest исходный запрос клиента
      */
     public void setClientRequest(ClientRequest clientRequest) {
@@ -29,6 +31,7 @@ public class ServerResponse {
     }
 
     /**
+     * Получить статус ответа сервера ( = 1 - удачно, = -1 - не удачно )
      * @return статус ответа = 1 - удачно, = -1 - не удачно
      */
     public int getStatus() {
@@ -36,6 +39,7 @@ public class ServerResponse {
     }
 
     /**
+     * Установить статус ответа сервера ( = 1 - удачно, = -1 - не удачно )
      * @param status статус ответа = 1 - удачно, = -1 - не удачно
      */
     public void setStatus(int status) {
@@ -43,6 +47,7 @@ public class ServerResponse {
     }
 
     /**
+     * Получить сообщение-ответ сервера
      * @return сообщение
      */
     public String getMessage() {
@@ -50,6 +55,7 @@ public class ServerResponse {
     }
 
     /**
+     * Установить сообщение-ответ сервера
      * @param message сообщение ответа на запрос
      */
     public void setMessage(String message) {
@@ -57,6 +63,7 @@ public class ServerResponse {
     }
 
     /**
+     * Получить значение выиигрыша
      * @return выигрыш
      */
     public float getWin() {
@@ -64,6 +71,7 @@ public class ServerResponse {
     }
 
     /**
+     * Установить значение выигрыша
      * @param win выигрыш
      */
     public void setWin(float win) {
@@ -71,6 +79,7 @@ public class ServerResponse {
     }
 
     /**
+     * Получить данные объекта класса ServerResponse в виде json-строки
      * @return json-строка с данными полей объекта типа ServerResponse
      */
     public String toJson() {
@@ -81,6 +90,7 @@ public class ServerResponse {
     }
 
     /**
+     * Распарсить данные объекта типа ServerResponse из json-строки
      * @param jsonString json-строка с данными полей объекта типа ServerResponse
      * @return результат операции. true - парсинг json-строки удачен, false - парсинг json-строки не удачен
      */
@@ -142,6 +152,10 @@ public class ServerResponse {
     }
 
 
+    /**
+     * Получить данные объекта класса ServerResponse в виде json-строки
+     * @return данные объекта в виде json-cnhjrb
+     */
     @Override
     public String toString() {
         return toJson();

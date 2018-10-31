@@ -129,8 +129,8 @@ public class ClientMainRun {
             System.out.println(lineString);
         }
 
-//        int localUserId = userId.addAndGet(1);
-//
+        int localUserId = userId.addAndGet(1);
+
 //        Gamer gamer2 = new Gamer();
 //        gamer2.setUserId(localUserId);
 //        gamer2.setUserName("STOP");

@@ -20,6 +20,8 @@ public class Client extends Thread {
     // поток данных к серверу
     OutputStream outputStream;
 
+    private static final int WAITING_TIME_IN_MILLISECONDS = 1_000;
+
     // общее количество потоков - одновременно играющих игроков- клиентов
     private static int threadcount = 0;
     // адрес
@@ -165,9 +167,9 @@ public class Client extends Thread {
 
                         }
 
-                    // ждём ответ от сервера на свой запрос 10 секунд
+                    // ждём ответ от сервера на свой запрос 1 секунду
                     try {
-                        socket.setSoTimeout(10_000);
+                        socket.setSoTimeout(WAITING_TIME_IN_MILLISECONDS);
                     } catch (SocketException e) {
                         e.printStackTrace();
                     }
@@ -178,7 +180,7 @@ public class Client extends Thread {
                         try {
                             realBytesCount = this.inputStream.read(bufResive);
                         } catch (IOException e) {
-                            // не получили ответ от сервера за 10 секунд - считаем неудачной попытку
+                            // не получили ответ от сервера за 1 секунду - считаем неудачной попытку
                             long endTime = System.currentTimeMillis();
                             gamer.changeBadRequestCount(1);
                             gamer.changeAllRequestTime(endTime - startTime);

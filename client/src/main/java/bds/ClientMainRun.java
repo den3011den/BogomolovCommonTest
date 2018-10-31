@@ -24,7 +24,7 @@ public class ClientMainRun {
     static final int BET = 10;
 
     // общее время теста ~
-    static final long TEST_TIME = 30_000;
+    static final long TEST_TIME = 60_000;
 
     // main
     public static void main(String[] args) throws InterruptedException {

@@ -172,20 +172,20 @@ public class Client extends Thread {
                     if (badFlag == 0) {
                         try {
                             realBytesCount = this.inputStream.read(bufResive);
-                        } catch (SocketTimeoutException e) {
+                        } catch (IOException e) {
                             // не получили ответ от сервера за 10 секунд - считаем неудачной попытку
                             long endTime = System.currentTimeMillis();
                             gamer.changeBadRequestCount(1);
                             gamer.changeAllRequestTime(endTime - startTime);
-                            System.out.println(Thread.currentThread().getName() + " : server response timeout : 10s");
-                        } catch (IOException e) {
+                            System.out.println(Thread.currentThread().getName() + " : cannot read server response. Bad requests + 1");
+                        } /*catch (IOException e) {
                             // не смогли прочитать ответ
                             long endTime = System.currentTimeMillis();
                             gamer.changeBadRequestCount(1);
                             gamer.changeAllRequestTime(endTime - startTime);
-                            System.out.println(Thread.currentThread().getName() + " : cannot read server response. Bad requests + 1");
+                            System.out.println(Thread.currentThread().getName() + " : cannot read server response. Bad requests + 1") ;
 
-                        }
+                        }*/
                     }
 
                     long endTime = System.currentTimeMillis();

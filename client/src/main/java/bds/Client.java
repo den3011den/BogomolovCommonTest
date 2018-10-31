@@ -4,11 +4,7 @@ import bds.communication.ClientRequest;
 import bds.communication.ServerResponse;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.util.Scanner;
+import java.net.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

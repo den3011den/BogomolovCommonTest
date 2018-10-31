@@ -82,32 +82,37 @@ public class Client extends Thread {
             // засчитываем попытку неудачной и добавляем её время
             gamer.changeBadRequestCount(1);
             gamer.changeAllRequestTime(endTime - startTime);
+            System.out.println(Thread.currentThread().getName() + " : cannot create socket");
             e.printStackTrace();
         }
 
         startTime = System.currentTimeMillis();
 
-        try {
 
-            // поток данных от сервера
-            this.inputStream = this.socket.getInputStream();
-
-            // поток данных к серверу
-            this.outputStream = this.socket.getOutputStream();
-
-            // запуск потока
-
-        } catch (IOException e) {
-            okFlag = false;
-            long endTime = System.currentTimeMillis();
-            // засчитываем попытку неудачной
-            gamer.changeBadRequestCount(1);
-            gamer.changeAllRequestTime(endTime - startTime);
-
+        if (okFlag) {
             try {
-                this.socket.close();
-            } catch (IOException e2) {
-                e.printStackTrace();
+
+                // поток данных от сервера
+                this.inputStream = this.socket.getInputStream();
+
+                // поток данных к серверу
+                this.outputStream = this.socket.getOutputStream();
+
+                // запуск потока
+
+            } catch (IOException e) {
+                okFlag = false;
+                long endTime = System.currentTimeMillis();
+                // засчитываем попытку неудачной
+                gamer.changeBadRequestCount(1);
+                gamer.changeAllRequestTime(endTime - startTime);
+                System.out.println(Thread.currentThread().getName() + " : cannot create streams");
+
+                try {
+                    this.socket.close();
+                } catch (IOException e2) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -143,22 +148,22 @@ public class Client extends Thread {
 
                     long startTime = System.currentTimeMillis();
 
-                    socketStart();
+                    if (socketStart()) {
 
-                    //System.out.println(outputStream.toString());
+                        //System.out.println(outputStream.toString());
 
-                    try {
-                        this.outputStream.write(bufSend);
-                        outputStream.flush();
-                    } catch (IOException e) {
-                        // не смогли послать запрос
-                        badFlag = 1;
-                        long endTime = System.currentTimeMillis();
-                        gamer.changeBadRequestCount(1);
-                        gamer.changeAllRequestTime(endTime - startTime);
-                        System.out.println(Thread.currentThread().getName() + " : cannot send request to server. Bad requests + 1");
+                        try {
+                            this.outputStream.write(bufSend);
+                            outputStream.flush();
+                        } catch (IOException e) {
+                            // не смогли послать запрос
+                            badFlag = 1;
+                            long endTime = System.currentTimeMillis();
+                            gamer.changeBadRequestCount(1);
+                            gamer.changeAllRequestTime(endTime - startTime);
+                            System.out.println(Thread.currentThread().getName() + " : cannot send request to server. Bad requests + 1");
 
-                    }
+                        }
 
                     // ждём ответ от сервера на свой запрос 10 секунд
                     try {
@@ -213,7 +218,6 @@ public class Client extends Thread {
                         }
 
                     }
-
                     // в интрервале между запросами грубо пытаемся учесть время самого запроса
                     if (diffTime < requestInterval) {
                         try {
@@ -223,15 +227,25 @@ public class Client extends Thread {
                         }
                     }
 
+                        try {
+                            this.outputStream.close();
+                            this.inputStream.close();
+                            socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                else {
+                        try {
+                            sleep(requestInterval);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-              try {
-                  this.outputStream.close();
-                  this.inputStream.close();
-                  socket.close();
-              } catch (IOException e) {
-                  e.printStackTrace();
-              }
-            // уменьшаем кол-во играющих
+             // уменьшаем кол-во играющих
             System.out.println(Thread.currentThread().getName() + " : thread finished");
             threadcount--;
             /// ??? ClientMainRun.threads.remove(gamer.getUserId());

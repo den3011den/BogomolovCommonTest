@@ -136,7 +136,7 @@ public class GameServer extends Thread {
                             if (win <= 0)
                                 message = "You lost " + win + ". Lets try one more time!";
                             else
-                                message = "You win " + win + "!. Try to increase your income!";
+                                message = "You won " + win + "!. Try to increase your income!";
                             serverResponse.setMessage(message);
                             serverResponse.setWin(win);
 

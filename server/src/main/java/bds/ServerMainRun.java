@@ -6,15 +6,18 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Стартовый класс для игрового сервера. Работает в бесконечном цикле.
+ * Заканчивает работу только при снятии процесса в системе
+ */
 public class ServerMainRun {
-
 
 //    static AtomicInteger testScore = new AtomicInteger(0);
 
-    // текущий номер записи в истории событий аккаунтов
+    // максимальный номер записи в истории событий аккаунтов
     static AtomicInteger historyId = new AtomicInteger(0);
 
-    // таблица аккаунтов игроков. Если игрок обращается к серверу впервые - создаём аккаунт и даёт 100 игровых денежных единиц
+    // таблица аккаунтов игроков. Если игрок обращается к серверу впервые - создается аккаунт и дается 100 игровых денежных единиц
     static ConcurrentHashMap<String, Account> accounts = new ConcurrentHashMap<>();
 
     // таблица событий аккаунтов. Записываем только события создания аккаунта при первом обращении игрока к серверу
@@ -23,6 +26,7 @@ public class ServerMainRun {
     // в историю не пишутся
     static ConcurrentHashMap<String, AccountHistoryQuantum> accountsHistory = new ConcurrentHashMap<>();
 
+    // адрес сервера (localhost)
     static InetAddress inetAddress;
 
     static {
@@ -34,9 +38,13 @@ public class ServerMainRun {
         }
     }
 
+    // порт сервера
     static final int PORT = 3158;
 
-    // запуск игрового сервера
+    /**
+     * Запуск игрового сервера
+     * @param args параметры командной строки
+     */
     public static void main(String args[])
     {
         try

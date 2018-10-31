@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * игровой сервер
+ * игровой сервер - нить ответа на игровой запрос
  */
 public class GameServer extends Thread {
 
@@ -26,15 +26,20 @@ public class GameServer extends Thread {
     // ссылка на таблицу событий аккаунтов
     ConcurrentHashMap<String, AccountHistoryQuantum> accountsHistory;
 
-    // ссылка на текущий номер записи в истории событий аккаунтов
+    // ссылка на максимальный номер записи в истории событий аккаунтов
     AtomicInteger historyId;
 
-    // сокет
+    // сокет-клиент
     Socket socket;
 
+
     /**
-     * @param socket сокет
-     * @param threadNumber номер потока
+     * Параметризованый конструктор
+     * @param socket сокет-клиент
+     * @param threadNumber номер нити (потока)
+     * @param historyId ссылка на объект с максимальным целым номером в остории событий
+     * @param accounts ссылка на таблицу аккаунтов игроков
+     * @param accountsHistory ссылка на таблицу событий аккаунтов
      */
     public GameServer(Socket socket, int threadNumber, AtomicInteger historyId, ConcurrentHashMap<String, Account> accounts,
                       ConcurrentHashMap<String, AccountHistoryQuantum> accountsHistory)
@@ -54,14 +59,14 @@ public class GameServer extends Thread {
     }
 
     /**
-     * реализация алгоритма работы отдельного потока
+     * Реализация алгоритма работы нити (потока)
      */
     public void run()
     {
         try
         {
-
             System.out.println(Thread.currentThread().getName() + " : Got client connection. Started thread. ");
+
             // поток данных от клиента
             InputStream inputStream = socket.getInputStream();
 
@@ -73,6 +78,7 @@ public class GameServer extends Thread {
             // читаем 64кб от клиента, результат - кол-во реально принятых данных
             int realBytesCount = 0;
             try {
+                // чтение запроса клиента к игровому серверу (ставка)
                 realBytesCount = inputStream.read(buf);
             }
             catch (IOException e) {
@@ -91,7 +97,6 @@ public class GameServer extends Thread {
 //                if (clientRequest.getUserName().equals("STOP")) {
 //                    System.out.println("Stop");
 //                }
-
 
                 ServerResponse serverResponse = new ServerResponse();
 
@@ -196,6 +201,7 @@ public class GameServer extends Thread {
         catch(Exception e)
             {e.printStackTrace();} // вывод исключений
 
+        // обработка запроса клиента заврешена - завершена и нить
         System.out.println(Thread.currentThread().getName() + " : closing thread");
     }
 }

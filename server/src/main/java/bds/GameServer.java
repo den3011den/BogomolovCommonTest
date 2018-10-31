@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Игровой многопоточный сервер
+ * игровой сервер
  */
 public class GameServer extends Thread {
 

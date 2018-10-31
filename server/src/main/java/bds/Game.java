@@ -3,7 +3,7 @@ package bds;
 import bds.communication.ClientRequest;
 
 /**
- * Игра - условия и сам игровой акт
+ * игра - алгоритм и игровой раунд
  */
 public class Game {
     // вероятность выигрыша 50%

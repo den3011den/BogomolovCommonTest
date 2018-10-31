@@ -1,7 +1,7 @@
 package bds;
 
 /**
- * Игрок
+ * игрок
  */
 public class Gamer {
     // уникальный id игрока

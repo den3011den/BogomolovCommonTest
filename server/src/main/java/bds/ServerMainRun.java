@@ -53,6 +53,7 @@ public class ServerMainRun {
                 // запроса клиента в отдельном потоке и увеличиваем счётчик на единицу
                 new GameServer(server.accept(), i, historyId, accounts, accountsHistory);
                 i++;
+
             }
         }
         catch(Exception e)

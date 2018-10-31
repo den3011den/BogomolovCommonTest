@@ -84,9 +84,9 @@ public class GameServer extends Thread {
                 ClientRequest clientRequest = new ClientRequest();
                 clientRequest.fromJson(gotString);
 
-                if (clientRequest.getUserName().equals("STOP")) {
-                    System.out.println("Stop");
-                }
+//                if (clientRequest.getUserName().equals("STOP")) {
+//                    System.out.println("Stop");
+//                }
 
 
                 ServerResponse serverResponse = new ServerResponse();

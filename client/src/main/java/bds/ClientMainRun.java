@@ -129,17 +129,17 @@ public class ClientMainRun {
             System.out.println(lineString);
         }
 
-        int localUserId = userId.addAndGet(1);
-
-        Gamer gamer2 = new Gamer();
-        gamer2.setUserId(localUserId);
-        gamer2.setUserName("STOP");
-        gamer2.changeScore(100);
-        gamer2.changeBadRequestCount(0);
-        gamer2.changeGoodRequestCount(0);
-        gamer2.changeAllRequestTime(0);
-
-        new Client(inetAddress, gamer2, gamers, requestInterval, requestCount);
+//        int localUserId = userId.addAndGet(1);
+//
+//        Gamer gamer2 = new Gamer();
+//        gamer2.setUserId(localUserId);
+//        gamer2.setUserName("STOP");
+//        gamer2.changeScore(100);
+//        gamer2.changeBadRequestCount(0);
+//        gamer2.changeGoodRequestCount(0);
+//        gamer2.changeAllRequestTime(0);
+//
+//        new Client(inetAddress, gamer2, gamers, requestInterval, requestCount);
         System.out.println(Thread.currentThread().getName() + " : client test finished");
 
     }

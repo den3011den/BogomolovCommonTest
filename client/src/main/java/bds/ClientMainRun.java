@@ -25,7 +25,7 @@ public class ClientMainRun {
 
     // приблизительное время в миллисекундах, которое будут создаваться и запускаться новые клиенты для сервера
     // (сама работа уже запущенных потоков длится как правило дольше)
-    static final long TEST_TIME = 60_000;
+    static final long TEST_TIME = 10_000;
 
     /**
      * Запуск теста
@@ -100,7 +100,7 @@ public class ClientMainRun {
 
                 // делаем клиента для сервера для этого игрока
                 // принцип: один игрок - один поток
-                threads.put(String.valueOf(gamer.getUserId()), new Client(inetAddress, gamer, gamers, requestInterval, requestCount));
+                threads.put(String.valueOf(gamer.getUserId()), new Client(inetAddress, gamer.getUserId(), gamers, requestInterval, requestCount));
 
 
             } else {
@@ -138,15 +138,16 @@ public class ClientMainRun {
 
         int localUserId = userId.addAndGet(1);
 
-//        Gamer gamer2 = new Gamer();
-//        gamer2.setUserId(localUserId);
-//        gamer2.setUserName("STOP");
-//        gamer2.changeScore(100);
-//        gamer2.changeBadRequestCount(0);
-//        gamer2.changeGoodRequestCount(0);
-//        gamer2.changeAllRequestTime(0);
-//
-//        new Client(inetAddress, gamer2, gamers, requestInterval, requestCount);
+//        Gamer gamer2 = new Gamer();           //!!!!!!!!!!!
+//        gamer2.setUserId(localUserId);        //!!!!!!!!!!!
+//        gamer2.setUserName("STOP");           //!!!!!!!!!!!
+//        gamer2.changeScore(100);              //!!!!!!!!!!!
+//        gamer2.changeBadRequestCount(0);      //!!!!!!!!!!!
+//        gamer2.changeGoodRequestCount(0);     //!!!!!!!!!!!
+//        gamer2.changeAllRequestTime(0);       //!!!!!!!!!!!
+//        gamers.put("999999", gamer2);
+//        new Client(inetAddress, 999999, gamers, requestInterval, requestCount);       //!!!!!!!!!!!
+
         System.out.println(Thread.currentThread().getName() + " : client test finished");
 
     }

@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class GameServer extends Thread {
 
-    //AtomicInteger testScore;
+//    AtomicInteger testScore;    //!!!!!!
 
     // номер нити
     int threadNumber = 0;
@@ -50,7 +50,7 @@ public class GameServer extends Thread {
         this.accountsHistory = accountsHistory;
         this.historyId = historyId;
 
-        //this.testScore = ServerMainRun.testScore;
+//        this.testScore = ServerMainRun.testScore;   //!!!!!!!!!
 
         // запуск потока
         setDaemon(true);
@@ -61,29 +61,55 @@ public class GameServer extends Thread {
     /**
      * Реализация алгоритма работы нити (потока)
      */
-    public void run()
-    {
-        try
-        {
-            System.out.println(Thread.currentThread().getName() + " : Got client connection. Started thread. ");
+    public void run() {
+        System.out.println(Thread.currentThread().getName() + " : Got client connection. Started thread. ");
 
-            // поток данных от клиента
-            InputStream inputStream = socket.getInputStream();
 
+        boolean badFlag = false;
+        // поток данных от клиента
+        InputStream inputStream = null;
+        try {
+            inputStream = socket.getInputStream();
+        } catch (IOException e) {
+            badFlag = true;
+            try {
+                socket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            e.printStackTrace();
+        }
+
+        OutputStream outputStream = null;
+        if (!badFlag) {
             // поток данных к клиенту
-            OutputStream outputStream = socket.getOutputStream();
+            try {
+                outputStream = socket.getOutputStream();
+            } catch (IOException e) {
+                badFlag = true;
+                try {
+                    socket.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                e.printStackTrace();
+            }
+        }
 
+
+        if (!badFlag) {
             // буффер данных в 64 килобайта
-            byte buf[] = new byte[64*1024];
+            byte buf[] = new byte[64 * 1024];
             // читаем 64кб от клиента, результат - кол-во реально принятых данных
             int realBytesCount = 0;
             try {
                 // чтение запроса клиента к игровому серверу (ставка)
                 realBytesCount = inputStream.read(buf);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 realBytesCount = 0;
             }
+
+            Account account = null;
 
             if (realBytesCount > 0) {
                 // создаём строку, содержащую полученную от клиента информацию
@@ -94,9 +120,9 @@ public class GameServer extends Thread {
                 ClientRequest clientRequest = new ClientRequest();
                 clientRequest.fromJson(gotString);
 
-//                if (clientRequest.getUserName().equals("STOP")) {
-//                    System.out.println("Stop");
-//                }
+//                if (clientRequest.getUserName().equals("STOP")) {   //!!!!!!!!!!
+//                    System.out.println("Stop");                     //!!!!!!!!!!
+//                }  //!!!!!!!!!!
 
                 ServerResponse serverResponse = new ServerResponse();
 
@@ -104,7 +130,7 @@ public class GameServer extends Thread {
                 if (clientRequest.getUserId() > 0) {
 
                     // попытка прочитать данные счёта из базы счетов
-                    Account account = accounts.get(String.valueOf(clientRequest.getUserId()));
+                    account = accounts.get(String.valueOf(clientRequest.getUserId()));
 
                     // не найден счёт. Создаём и кладём на него 100 игровых денежных единиц
                     if (account == null) {
@@ -116,8 +142,8 @@ public class GameServer extends Thread {
                         accountsHistory.put(String.valueOf(accountHistoryQuantum.getHistoryId()), accountHistoryQuantum); // кладём событие истории в базу истории
                         account = newAccount; // запоминаем ссылку на данные аккаунта
 
-//                        if (newAccount.getUserId()==44)
-//                            ServerMainRun.testScore.addAndGet((100));
+//                        if (newAccount.getUserId()==44)     //!!!!!!!!!!!
+//                           ServerMainRun.testScore.addAndGet((100));         //!!!!!!!!
 
                         System.out.println(Thread.currentThread().getName() + " : Created gamer account. userId : " + account.getUserId());
                     }
@@ -151,17 +177,6 @@ public class GameServer extends Thread {
                                 message = "You won " + win + "!. Try to increase your income!";
                             serverResponse.setMessage(message);
                             serverResponse.setWin(win);
-
-                            account.changeScore(win);
-
-//                            if (account.getUserId()==44)
-//                                ServerMainRun.testScore.addAndGet((int)win);
-
-                            //??? accounts.put(String.valueOf(account.getUserId()), account);
-                            historyId.addAndGet(1);
-                            AccountHistoryQuantum accountHistoryQuantum = new AccountHistoryQuantum(historyId.get(), win, System.currentTimeMillis(), clientRequest.getCoinSide(), account);
-                            accountsHistory.put(String.valueOf(accountHistoryQuantum.getHistoryId()), accountHistoryQuantum);
-
                         }
 
                     } else {
@@ -191,16 +206,44 @@ public class GameServer extends Thread {
                         ". Sending response string : " + responseString);
 
                 // шлём ответ клиенту
-                outputStream.write(responseString.getBytes());
+                try {
+                    outputStream.write(responseString.getBytes());
+                } catch (IOException e) {
+                    badFlag = true;
+                    e.printStackTrace();
+                }
+
+                if (!badFlag) {
+                    realBytesCount = 0;
+                    try {
+                        // попытка получить от клиента информацию о получении данных о произошедшем игровом раунде
+                        realBytesCount = inputStream.read(buf);
+                    } catch (IOException e) {
+                        realBytesCount = 0;
+                    }
+                    gotString = new String(buf, 0, realBytesCount);
+                    // при подтверждении от клиента меняем остаток на аккаунте игрока
+                    if (gotString.equals("GOT")) {
+                        account.changeScore(serverResponse.getWin());
+                        historyId.addAndGet(1);
+                        AccountHistoryQuantum accountHistoryQuantum = new AccountHistoryQuantum(historyId.get(), serverResponse.getWin(), System.currentTimeMillis(), clientRequest.getCoinSide(), account);
+                        accountsHistory.put(String.valueOf(accountHistoryQuantum.getHistoryId()), accountHistoryQuantum);
+//                        if (account.getUserId() == 44)      //!!!!!!!!!!!
+//                            ServerMainRun.testScore.addAndGet((int) serverResponse.getWin());        //!!!!!!!!!!!
+                    }
+
+                }
             }
-            // завершаем соединение
+        }
+
+        // завершаем соединение
+        try {
             outputStream.close();
             inputStream.close();
             socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        catch(Exception e)
-            {e.printStackTrace();} // вывод исключений
-
         // обработка запроса клиента заврешена - завершена и нить
         System.out.println(Thread.currentThread().getName() + " : closing thread");
     }

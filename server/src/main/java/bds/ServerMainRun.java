@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ServerMainRun {
 
-//    static AtomicInteger testScore = new AtomicInteger(0);
+//    static AtomicInteger testScore = new AtomicInteger(0);    //!!!!!!!!!!!!!
 
     // максимальный номер записи в истории событий аккаунтов
     static AtomicInteger historyId = new AtomicInteger(0);

@@ -13,13 +13,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Client extends Thread {
 
 
-    // сокет
+    // сокет клиента
     Socket socket;
     // поток данных от сервера
     InputStream inputStream;
     // поток данных к серверу
     OutputStream outputStream;
 
+    // вермя ожидания ответа от сервера в миллисекундах
+    // после этого клиент считает, что неудачное обращение к серверу
+    // и перестаёт ждать и совершает новую попытку. Даже если сервер
+    // пришлёт ответ через 2 секунды с выигрышем
     private static final int WAITING_TIME_IN_MILLISECONDS = 1_000;
 
     // общее количество потоков - одновременно играющих игроков- клиентов
@@ -31,12 +35,13 @@ public class Client extends Thread {
     // ссылка на базу игроков
     ConcurrentHashMap<String, Gamer> gamers;
 
-    // интервал запросов в миллисекундах
+    // интервал между запросами игрока в миллисекундах
     int requestInterval;
     // количество запросов к серверу одного игрока
     int requestCount;
 
     /**
+     * Получить количество одновременно играющих игроков-потоков
      * @return количество одновременно играющих игроков-потоков
      */
     public static int threadCount() {
@@ -45,10 +50,11 @@ public class Client extends Thread {
 
 
     /**
+     * Параметризованный конструктор
      * @param addr            адрес подключения
      * @param gamer           ссылка на игрока
      * @param gamers          ссылка на базу (список) игроков
-     * @param requestInterval интервал между запросами в миллисекундах
+     * @param requestInterval интервал между запросами игрока в миллисекундах
      * @param requestCount    количество запросов к серверу одного игрока
      */
     public Client(InetAddress addr, Gamer gamer, ConcurrentHashMap<String, Gamer> gamers, int requestInterval, int requestCount) {
@@ -65,11 +71,13 @@ public class Client extends Thread {
             start();
         }
 
-
     }
 
 
-    //
+    /**
+     * Подключение к серверу и получение потоков входящего и исходящего
+     * @return true - поключение к серверу прошло успешно, false - поключение к серверу провалилось
+     */
     private boolean socketStart() {
 
         boolean okFlag = true;
@@ -88,10 +96,7 @@ public class Client extends Thread {
             e.printStackTrace();
         }
 
-        startTime = System.currentTimeMillis();
-
-
-        if (okFlag) {
+        if (okFlag) { // сокет удалось получить
             try {
 
                 // поток данных от сервера
@@ -126,10 +131,11 @@ public class Client extends Thread {
      * Алгоритм работы нити игрока
      */
     public void run() {
+
                  // кол-во одновременно играющих
                 threadcount++;
 
-                //
+                // цикл по количеству запросов, которые должен сделать игрок
                 for (int i = 0, requestNumber = 0; i < requestCount; i++, requestNumber++) {
 
                     int badFlag = 0;
@@ -185,14 +191,7 @@ public class Client extends Thread {
                             gamer.changeBadRequestCount(1);
                             gamer.changeAllRequestTime(endTime - startTime);
                             System.out.println(Thread.currentThread().getName() + " : cannot read server response. Bad requests + 1");
-                        } /*catch (IOException e) {
-                            // не смогли прочитать ответ
-                            long endTime = System.currentTimeMillis();
-                            gamer.changeBadRequestCount(1);
-                            gamer.changeAllRequestTime(endTime - startTime);
-                            System.out.println(Thread.currentThread().getName() + " : cannot read server response. Bad requests + 1") ;
-
-                        }*/
+                        }
                     }
 
                     long endTime = System.currentTimeMillis();

@@ -20,18 +20,23 @@ public class ClientMainRun {
     // активные потоки
     static ConcurrentHashMap<String, Thread> threads = new ConcurrentHashMap<>();
 
-    // считаем, что ставят всегда по 10 игровых денежных единиц
+    // считаем, что ставят всегда при каждом запросе по 10 игровых денежных единиц
     static final int BET = 10;
 
     // приблизительное время в миллисекундах, которое будут создаваться и запускаться новые клиенты для сервера
+    // (сама работа уже запущенных потоков длится как правило дольше)
     static final long TEST_TIME = 60_000;
 
-    // main
+    /**
+     * Запуск теста
+     * @param args аргументы коммандной строки
+     * @throws InterruptedException не обрабатываемое исключение
+     */
     public static void main(String[] args) throws InterruptedException {
 
         System.out.println(Thread.currentThread().getName() + " : starting client test ");
 
-        // адрес подключения
+        // адрес подключения (localhost)
         InetAddress inetAddress = null;
 
         try {
@@ -41,20 +46,20 @@ public class ClientMainRun {
             System.exit(-1);
         }
 
-        // количество одновременно играющих пользователей
+        // максимальное количество пользователей, которые могут одновременно играть
         int gamerCount = 0;
         // интервал между обращениями к серверной стороне одного пользователя
         int requestInterval = 0;
-        // количество обращений к игровому серверу одного пользователя
+        // количество обращений к игровому серверу, которое будет сделано каждым пользователем
         int requestCount = 0;
 
-        // если входные заданы при запуске в качестве параметров коммандной строки
+        // если входные параметры заданы при запуске в качестве параметров коммандной строки
         if (args.length>=3) {
             gamerCount = Integer.valueOf(args[0]);
             requestInterval = Integer.valueOf(args[1]);
             requestCount = Integer.valueOf(args[2]);
         }
-        else { // иначе вводим руками
+        else { // иначе вводим руками (например 10 500 100)
             Scanner in = new Scanner(System.in);
             System.out.println("Enter gamerCount (int): ");
             gamerCount = in.nextInt();
@@ -94,12 +99,14 @@ public class ClientMainRun {
                 System.out.println(Thread.currentThread().getName() + " : created gamer. userId =  " + gamer.getUserId());
 
                 // делаем клиента для сервера для этого игрока
+                // принцип: один игрок - один поток
                 threads.put(String.valueOf(gamer.getUserId()), new Client(inetAddress, gamer, gamers, requestInterval, requestCount));
 
 
             } else {
                 System.out.println(Thread.currentThread().getName() + " : pause 100 ms ");
-                // если превышено количество играющих - ждём 100 ms
+                // если превышено количество играющих - ждём 100 ms перед следующей попыткой
+                // создать игрока-поток-клиента
                 Thread.currentThread().sleep(100);
             }
         }

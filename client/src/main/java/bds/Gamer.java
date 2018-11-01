@@ -8,18 +8,19 @@ public class Gamer {
     private int userId;
     // наименование игрока
     private String userName;
-    // счёт игрока
+    // текущий остаток денежных средств игрока
     private float score = 0.0F;
-    // количество хороших запросов к серверу
+    // количество хороших запросов игрока к серверу
     private int goodRequestCount = 0;
-    // количество плохих запросов к серверу
+    // количество плохих запросов игрока к серверу
     private int badRequestCount = 0;
-    // общее время запросов к серверу
+    // общее время запросов игрока к серверу
     private long allRequestTime = 0L;
-    // среднее время запросов к серверу
+    // среднее время запросов игрока к серверу
     private long averageRequestTime = 0L;
 
     /**
+     * Получить id игрока
      * @return уникальный id игрока
      */
     public int getUserId() {
@@ -27,6 +28,7 @@ public class Gamer {
     }
 
     /**
+     * Установить id игрока
      * @param userId уникальный id игрока
      */
     public void setUserId(int userId) {
@@ -34,6 +36,7 @@ public class Gamer {
     }
 
     /**
+     * Получить наименование игрока
      * @return наименование игрока
      */
     public String getUserName() {
@@ -41,6 +44,7 @@ public class Gamer {
     }
 
     /**
+     * Установить наименование игрока
      * @param userName наименование игрока
      */
     public void setUserName(String userName) {
@@ -48,6 +52,7 @@ public class Gamer {
     }
 
     /**
+     * Получить остаток средств игрока
      * @return счёт игрока
      */
     public float getScore() {
@@ -55,25 +60,32 @@ public class Gamer {
     }
 
     /**
-     * @param difference величина изменения счёта игрока
+     * измениить остаток средств игрока
+     * @param difference величина изменения остатка средств игрока
      */
     public void changeScore(float difference) {
         score = score + difference;
     }
 
     /**
+     * Получить количество хороших запросов к серверу
      * @return количество хороших запросов к серверу
      */
     public int getGoodRequestCount() {
         return goodRequestCount;
     }
 
-     public void changeGoodRequestCount(int difference) {
+    /**
+     * изменить количество хороших запросов игрока к серверу
+     * @param difference величина изменения количества хороших запросов игрока к серверу
+     */
+    public void changeGoodRequestCount(int difference) {
         goodRequestCount = goodRequestCount + difference;
         recalculateAverageRequestTime();
     }
 
     /**
+     * Получить количество плохих запросов игрока к серверу
      * @return количество плохих запросов к серверу
      */
     public int getBadRequestCount() {
@@ -81,6 +93,7 @@ public class Gamer {
     }
 
     /**
+     * изменить количество плохих запросов игрока к серверу
      * @param difference величина изменения количества плохих запросов к серверу
      */
     public void changeBadRequestCount(int difference) {
@@ -89,14 +102,16 @@ public class Gamer {
     }
 
     /**
-     * @return время всех запросов к серверу
+     * Получить все время запросов игрока к серверу в миллисекундах
+     * @return время всех запросов игрока к серверу
      */
     public long getAllRequestTime() {
         return allRequestTime;
     }
 
     /**
-     * @param difference величина изменения времени всех запросов сервера
+     * изменить общее время запросов игрока к серверу
+     * @param difference величина изменения общего времени запросов игрока к серверу
      */
     public void changeAllRequestTime(long difference) {
         allRequestTime = allRequestTime + difference;
@@ -104,14 +119,15 @@ public class Gamer {
     }
 
     /**
-     * @return среднее время одного запроса
+     * Получить среднее время запроса игрока к серверу
+     * @return среднее время одного запроса игрока к серверу
      */
     public long getAverageRequestTime() {
         return averageRequestTime;
     }
 
     /**
-     * Считает среднее время запроса при изменении количества плохих запросов, хороших запросов, обещего времени запросов
+     * Пересчитать среднее время запроса игрока к серверу
      */
     private void recalculateAverageRequestTime() {
         if ((badRequestCount!=0) || (goodRequestCount!=0))
